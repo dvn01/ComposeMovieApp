@@ -1,26 +1,78 @@
 package com.dairymaster.composemovieapp.screens.details
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
+import com.dairymaster.composemovieapp.models.Movie
+import com.dairymaster.composemovieapp.models.getMovies
+import com.dairymaster.composemovieapp.widgets.MovieRow
 
 @Composable
-fun DetailsScreen(navController: NavController,
-                  movieData: String?) {
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+fun DetailsScreen(
+    navController: NavController,
+    movieId: String?
+) {
+    val movie = getMovies().filter { movie ->
+        movie.id == movieId
+    }[0] // return the first item from the list
+
+    Scaffold(topBar = {
+        TopAppBar(
+            backgroundColor = Color.Transparent,
+            elevation = 1.dp,
         ) {
-            Text(text = movieData.toString(), style = MaterialTheme.typography.h5)
+            Row(horizontalArrangement = Arrangement.Start) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Arrow Back Icon",
+                    modifier = Modifier.clickable {
+                        navController.popBackStack()
+                    })
+            }
+            Spacer(modifier = Modifier.width(100.dp))
+            Text(text = "Movies Details")
+        }
+    }) {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                MovieRow(movie = movie)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Movie Images")
+                HorizontalScrollableImageView(movie)
+            }
         }
     }
 
+}
+
+@Composable
+private fun HorizontalScrollableImageView(movie: Movie) {
+    LazyRow {
+        items(movie.images) { image ->
+            Card(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .size(240.dp),
+                elevation = 4.dp
+            ) {
+                Image(
+                    painter = rememberImagePainter(data = image),
+                    contentDescription = "Movie images"
+                )
+            }
+        }
+    }
 }
